@@ -83,11 +83,13 @@ float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *
     // total size of input buffer: 2048 + 480 = 2528
     int input_frame_size = IO_FRAME_SIZE + FRAME_SIZE;
 
+    // "in" buffer has IO_FRAME_SIZE samples
     for (size_t i = 0; i < IO_FRAME_SIZE; i++) {
         size_t idx = (input_write_offset + i) % input_frame_size;
         // printf("idx = %d\n", idx);
         input_buffer[idx] = in[i];
     }
+
     input_write_offset += IO_FRAME_SIZE;
     input_write_offset %= input_frame_size;
 
@@ -102,7 +104,7 @@ float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *
     }
     size_t rnnoise_iter = n_samples/FRAME_SIZE;
 
-    printf("input samples: %d, processing %d frames\n", n_samples, rnnoise_iter);
+    // printf("input samples: %d, processing %d frames\n", n_samples, rnnoise_iter);
 
     for (size_t i = 0; i < rnnoise_iter; i++) {
         // fill x with one frame.
