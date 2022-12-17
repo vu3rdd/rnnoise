@@ -120,13 +120,16 @@ float buffered_rnnoise_process_frame(DenoiseState *st, int *out, const int *in) 
         // replace with a dummy process that copies input to
         // output as the first step to check if the buffering scheme
         // is working.
-        dummy_rnnoise_process_frame(st, x, x);
+        dummy_rnnoise_process_frame(st, y, x);
+        // rnnoise_process_frame(st, y, x);
 
         for (size_t j = 0; j < FRAME_SIZE; j++) {
             size_t idx = output_write_offset+j;
             idx %= input_frame_size;
-            output_buffer[idx] = x[j];
+
+            output_buffer[idx] = y[j];
         }
+
         output_write_offset += FRAME_SIZE;
         output_write_offset %= input_frame_size;
     }
