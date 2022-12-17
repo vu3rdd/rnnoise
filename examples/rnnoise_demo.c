@@ -34,7 +34,7 @@
 static float input_buffer[IO_FRAME_SIZE + FRAME_SIZE];
 static float output_buffer[IO_FRAME_SIZE + FRAME_SIZE];
 
-float buffered_rnnoise_process_frame(DenoiseState *st, int *out, const int *in) {
+float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
     // rnnnoise_process_frame has to be called with 480 samples
     // (ie. every 10ms), however, the buffered function may be called
     // with say 2048 samples, we should internally buffer the
