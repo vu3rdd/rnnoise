@@ -455,6 +455,13 @@ void pitch_filter(kiss_fft_cpx *X, const kiss_fft_cpx *P, const float *Ex, const
   }
 }
 
+// copy 480 samples from input to output
+float dummy_rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
+    for (size_t i = 0; i < FRAME_SIZE; i++) {
+        out[i] = in[i];
+    }
+}
+
 float rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
   int i;
   kiss_fft_cpx X[FREQ_SIZE];
