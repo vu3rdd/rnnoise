@@ -110,13 +110,14 @@ float buffered_rnnoise_process_frame(DenoiseState *st, int *out, const int *in) 
             // printf("i = %d, j = %d, input_buf idx = %d\n", i, j, input_read_offset+j);
             size_t idx = input_read_offset+j;
             idx %= input_frame_size;
+
             x[j] = input_buffer[idx];
         }
 
         input_read_offset += FRAME_SIZE;
-        input_read_offset = input_read_offset % input_frame_size;
+        input_read_offset %= input_frame_size;
 
-        // XXX replace with a dummy process that copies input to
+        // replace with a dummy process that copies input to
         // output as the first step to check if the buffering scheme
         // is working.
         dummy_rnnoise_process_frame(st, x, x);
@@ -127,15 +128,20 @@ float buffered_rnnoise_process_frame(DenoiseState *st, int *out, const int *in) 
             output_buffer[idx] = x[j];
         }
         output_write_offset += FRAME_SIZE;
-        output_write_offset = output_write_offset % input_frame_size;
+        output_write_offset %= input_frame_size;
     }
 
-    // now copy 2048 samples from output_read_offet into *out buffer.
+    // now copy 2048 samples from output_read_offset into *out buffer.
     for (size_t j = 0; j < IO_FRAME_SIZE; j++) {
-        size_t idx = (output_read_offset + j) % input_frame_size;
+        size_t idx = (output_read_offset + j);
+        idx %= input_frame_size;
+
         out[j] = output_buffer[idx];
     }
-    output_read_offset = (output_read_offset + IO_FRAME_SIZE) % input_frame_size;
+    output_read_offset += IO_FRAME_SIZE;
+    output_read_offset %= input_frame_size;
+
+    return 0.0;
 }
 
 int main(int argc, char **argv) {
@@ -171,8 +177,8 @@ int main(int argc, char **argv) {
     for (size_t i=0;i<IO_FRAME_SIZE;i++)
         tmp[i] = x[i];
     // skip the first frame
-    /* if (!first) */
-    fwrite(tmp, sizeof(short), IO_FRAME_SIZE, fout);
+    if (!first)
+        fwrite(tmp, sizeof(short), IO_FRAME_SIZE, fout);
     first = 0;
   }
   rnnoise_destroy(st);
