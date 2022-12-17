@@ -72,7 +72,7 @@ float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *
     float y[FRAME_SIZE];
 
     // input_offset is where we write input samples into
-    static size_t input_write_offset = 352; // 480*5 - 2048
+    static size_t input_write_offset = 480;
     static size_t input_read_offset = 0;
 
     // output_offset is where we read output samples from
