@@ -97,7 +97,7 @@ float buffered_rnnoise_process_frame(DenoiseState *st, int *out, const int *in) 
     // depends on whether we already have some output samples. How do
     // we determine that?
     int n_samples = (input_write_offset - input_read_offset);
-    if (n_samples < 0) {
+    if (n_samples <= 0) {
         n_samples += input_frame_size;
     }
     size_t rnnoise_iter = n_samples/FRAME_SIZE;
