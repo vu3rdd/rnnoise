@@ -481,7 +481,7 @@ float rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
   static const float b_hp[2] = {-2, 1};
   biquad(x, st->mem_hp_x, in, b_hp, a_hp, FRAME_SIZE);
   silence = compute_frame_features(st, X, P, Ex, Ep, Exp, features, x);
-
+  // printf("silence: %d\n", silence);
   if (!silence) {
     compute_rnn(&st->rnn, g, &vad_prob, features);
     pitch_filter(X, P, Ex, Ep, Exp, g);
@@ -504,6 +504,7 @@ float rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
 }
 
 float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *in) {
+    // printf("rnnr running %f %f %f\n", in[0], in[1], in[2]);
     // rnnnoise_process_frame has to be called with 480 samples
     // (ie. every 10ms), however, the buffered function may be called
     // with say 2048 samples, we should internally buffer the
@@ -575,6 +576,7 @@ float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *
 
     // printf("input samples: %d, processing %d frames\n", n_samples, rnnoise_iter);
     float vad_prob = 0.0;
+    float gain = 500000.0;
     for (size_t i = 0; i < rnnoise_iter; i++) {
         // fill x with one frame.
         for (size_t j = 0; j < FRAME_SIZE; j++) {
@@ -582,7 +584,7 @@ float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *
             size_t idx = input_read_offset+j;
             idx %= input_frame_size;
 
-            x[j] = input_buffer[idx];
+            x[j] = input_buffer[idx] * gain;
         }
 
         input_read_offset += FRAME_SIZE;
@@ -593,12 +595,13 @@ float buffered_rnnoise_process_frame(DenoiseState *st, float *out, const float *
         // is working.
         // dummy_rnnoise_process_frame(st, y, x);
         vad_prob = rnnoise_process_frame(st, y, x);
+        // printf("vad probability: %f\n", vad_prob);
 
         for (size_t j = 0; j < FRAME_SIZE; j++) {
             size_t idx = output_write_offset+j;
             idx %= input_frame_size;
 
-            output_buffer[idx] = y[j];
+            output_buffer[idx] = y[j]/gain;
         }
 
         output_write_offset += FRAME_SIZE;
